@@ -4,19 +4,20 @@ const server = net.createServer((socket) => {
   console.log("通信きた");
 
   socket.on("data", (data) => {
-    console.log(data.toString());
+    //console.log(data.toString());
     const d = data.toString().split("\r\n");
     const req = d[0].split(" "); //ステータスライン
     console.log(req);
 
-    const url = "public" + req[1];
+    const url =
+      "public" + (req[1].endsWith("/") ? req[1] + "index.html" : req[1]);
     console.log(url);
 
     const statusLine = "HTTP/1.1 200 OK\r\n";
     const header =
       "Host: codesandbox\r\n" +
       "Content-Type: " +
-      getType(req[1]) +
+      getType(url) +
       "; charset=utf-8\r\n";
     console.log(header);
 
@@ -26,8 +27,6 @@ const server = net.createServer((socket) => {
     if (req[0] === "GET") {
       if (fs.existsSync(url)) {
         socket.write(fs.readFileSync(url));
-      } else {
-        socket.write("HELLO WORLD\r\n");
       }
     } else if (req[0] === "POST") {
       const ps = d[d.length - 1]; //POST通信の際のデータ
@@ -49,8 +48,6 @@ const server = net.createServer((socket) => {
         } else if (rand === (pln + 1) % 3) {
           socket.write("勝ち");
         }
-      } else {
-        socket.write("HELLO WORLD\r\n");
       }
     }
     socket.end();
